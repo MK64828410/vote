@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>投票サイト</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            color: #333;
+            font-size: 2.2em;
+            margin-bottom: 20px;
+        }
+        button {
+            font-size: 16px;
+            padding: 12px 24px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        #voteA {
+            background-color: #FF6384;
+            color: white;
+        }
+        #voteB {
+            background-color: #36A2EB;
+            color: white;
+        }
+        #voteC {
+            background-color: #FFCE56;
+            color: white;
+        }
+        #reset {
+            background-color: #333;
+            color: white;
+        }
+        #results {
+            margin-top: 20px;
+            font-size: 20px;
+        }
+        #results p {
+            margin: 5px 0;
+        }
+        canvas {
+            margin-top: 20px;
+            max-width: 100%;
+            max-height: 300px; /* 円グラフのサイズを調整 */
+            display: block;
+            margin-left: auto;
+            margin-right: auto; /* 円グラフを中央に配置 */
+        }
+        .container {
+            text-align: center;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>投票してください</h1>
+        <button id="voteA" onclick="vote('A')">Aに投票</button>
+        <button id="voteB" onclick="vote('B')">Bに投票</button>
+        <button id="voteC" onclick="vote('C')">Cに投票</button>
+        <button id="reset" onclick="resetVotes()">投票をリセット</button>
+
+        <div id="results">
+            <p>A: <span id="countA">0</span> 票</p>
+            <p>B: <span id="countB">0</span> 票</p>
+            <p>C: <span id="countC">0</span> 票</p>
+        </div>
+
+        <canvas id="voteChart"></canvas>
+    </div>
+
+    <!-- Chart.jsの読み込み -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        let votes = { A: 0, B: 0, C: 0 };
+        let hasVoted = false;
+
+        // Chart.jsで円グラフを作成
+        const ctx = document.getElementById('voteChart').getContext('2d');
+        const voteChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['A', 'B', 'C'],
+                datasets: [{
+                    label: '投票結果',
+                    data: [votes.A, votes.B, votes.C],
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                }
+            }
+        });
+
+        function vote(option) {
+            if (hasVoted) {
+                alert("すでに投票しました。リセットするまで再投票できません。");
+                return;
+            }
+            votes[option]++;
+            updateResults();
+            disableButtons();
+            hasVoted = true;
+        }
+
+        function updateResults() {
+            document.getElementById("countA").innerText = votes.A;
+            document.getElementById("countB").innerText = votes.B;
+            document.getElementById("countC").innerText = votes.C;
+
+            // 円グラフのデータを更新
+            voteChart.data.datasets[0].data = [votes.A, votes.B, votes.C];
+            voteChart.update();
+        }
+
+        function disableButtons() {
+            document.getElementById("voteA").disabled = true;
+            document.getElementById("voteB").disabled = true;
+            document.getElementById("voteC").disabled = true;
+        }
+
+        function resetVotes() {
+            votes = { A: 0, B: 0, C: 0 };
+            updateResults();
+            enableButtons();
+            hasVoted = false;
+        }
+
+        function enableButtons() {
+            document.getElementById("voteA").disabled = false;
+            document.getElementById("voteB").disabled = false;
+            document.getElementById("voteC").disabled = false;
+        }
+    </script>
+
+</body>
+</html>
